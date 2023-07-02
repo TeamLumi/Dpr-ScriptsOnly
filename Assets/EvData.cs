@@ -10,12 +10,21 @@ public class EvData : ScriptableObject
 
     public string GetString(int index)
     {
-        return "";
+        if (index < StrList.Count)
+        {
+            if (StrList.Count <= index)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+            return StrList[index];
+        }
+        return null;
     }
 
     public EvData()
     {
-        // TODO
+        Scripts = new List<Script>();
+        StrList = new List<string>();
     }
 
     public enum ArgType
@@ -38,12 +47,13 @@ public class EvData : ScriptableObject
     [Serializable]
     public class Script
     {
-	    public string Label;
+        public string Label;
         public List<Command> Commands;
 
         public Script()
         {
-            // TODO
+            Label = "";
+            Commands = new List<Command>();
         }
     }
 
@@ -54,7 +64,7 @@ public class EvData : ScriptableObject
 
         public Command()
         {
-            // TODO
+            Arg = new List<Aregment>();
         }
     }
 }

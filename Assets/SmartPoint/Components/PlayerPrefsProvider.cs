@@ -4,53 +4,70 @@ namespace SmartPoint.Components
 {
     public abstract class PlayerPrefsProvider<T> where T : new()
     {
-        protected virtual string key
+        public string Key
         {
-            get { return null; }
+            get
+            {
+                return typeof(T).FullName;
+            }
         }
 
-        protected virtual void Initialization()
-        {
-        }
-
-        protected virtual bool CustomLoadOperation()
-        {
-            return default(bool);
-        }
-
-        protected virtual bool CustomSaveOperation()
-        {
-            return default(bool);
-        }
-
-        protected virtual bool CustomLoadAsyncOperation()
-        {
-            return default(bool);
-        }
-
-        protected virtual bool CustomSaveAsyncOperation()
-        {
-            return default(bool);
-        }
-
-        protected virtual void OnPostLoad()
-        {
-        }
-
-        protected virtual void OnPreSave()
-        {
-        }
+        private static T instance;
 
         public static T Instance
         {
             get
             {
-                if (_instance == null)
+                if (instance == null)
                 {
-                    _instance = new T();
+                    instance = Activator.CreateInstance<T>();
                 }
-                return _instance;
+                return instance;
             }
+        }
+
+        public void Initialization()
+        {
+            return;
+        }
+
+        public bool CustomLoadOperation()
+        {
+            return false;
+        }
+
+        public bool CustomSaveOperation()
+        {
+            return false;
+        }
+
+        public bool CustomLoadAsyncOperation()
+        {
+            //ulong result = CustomLoadOperation(); // Assuming CustomLoadOperation returns a ulong
+
+            //if ((result & 1) != 0) // Check if the least significant bit is set
+            //{
+                //OnPostLoad(); // Assuming OnPostLoad is a method of this class
+                //return true;
+            //}
+
+            return false;
+        }
+
+        public void CustomSaveAsyncOperation()
+        {
+            //function1?.Invoke();
+            //function2?.Invoke();
+        }
+
+        public void OnPostLoad()
+        {
+            return;
+        }
+
+        public void OnPreSave()
+        {
+            return;
         }
 
         public static void Load(bool forceReload = false, bool isAsync = false)

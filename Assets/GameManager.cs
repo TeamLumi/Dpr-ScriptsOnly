@@ -4,11 +4,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 //using Dpr.Message;
-//using Il2CppDummyDll;
-//using Pml;
-//using ScriptableObjectFormat;
+using Pml;
+using ScriptableObjectFormat;
 using SmartPoint.AssetAssistant;
-//using SmartPoint.Components;
+using SmartPoint.Components;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -16,6 +15,8 @@ using XLSXContent;
 
 public class GameManager : SingletonMonoBehaviour<GameManager>
 {
+    public static DateTime NowTime { get; set; }
+
     public class AfterInitType : ScriptableObject
     {
         public int Value;
@@ -82,7 +83,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         public void AfterInitialize2() { }
     }
 
-    public static FieldCamera fieldCamera;
+    //public static FieldCamera fieldCamera;
 
     private UnityEngine.Object fieldObjectHolder;
 
@@ -194,18 +195,6 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     }
 
     private static System.DateTime nowTime;
-
-    public System.DateTime NowTime
-    {
-        get
-        {
-            return GameManager.nowTime;
-        }
-        set
-        {
-            GameManager.nowTime = value;
-        }
-    }
 
     private static Int64 tickOffset;
 

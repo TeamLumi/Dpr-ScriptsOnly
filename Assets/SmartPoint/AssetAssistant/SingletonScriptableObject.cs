@@ -1,30 +1,43 @@
 ﻿using System;
+using System.Linq;
 using UnityEngine;
 
 namespace SmartPoint.AssetAssistant
 {
-    public abstract class SingletonScriptableObject<T> : ScriptableObject where T : class, new()
+    public class SingletonScriptableObject<T> : ScriptableObject where T : ScriptableObject
     {
-        private static T _instance;
+        public static T instance;
 
-        public static string className
+        public static T Instance
         {
-            get => Type.GetTypeFromHandle(typeof(T).TypeHandle).FullName;
+            get
+            {
+                if (instance == null)
+                {
+                    // Load the instance from resources if it's not already loaded
+                    instance = Resources.FindObjectsOfTypeAll<T>().FirstOrDefault();
+
+                    if (instance == null)
+                    {
+                        Debug.LogError("An instance of " + typeof(T) +
+                        " is needed in the scene, but there is none.");
+                    }
+                }
+                return instance;
+            }
         }
 
-        protected static T instance
+        public string ClassName
         {
-            get => _instance;
+            get { return typeof(T).Name; }
         }
 
-        protected virtual void OnEnable()
+        public void OnEnable()
         {
-            //TODO: no idea whats going on here
-        }
-
-        protected SingletonScriptableObject() : base()
-        {
-            //
+            if (instance == null)
+            {
+                instance = this as T;
+            }
         }
     }
 }

@@ -10,6 +10,7 @@ using Pml;
 using Dpr.Trainer;
 using DPData;
 using Dpr.UI;
+using SmartPoint.AssetAssistant;
 
 namespace Dpr.EvScript
 {
@@ -766,7 +767,7 @@ namespace Dpr.EvScript
 
                                 if (_eventEndDelegate != null && !(_eventEndDelegate is EventEndDelegate))
                                 {
-                                    ThrowInvalidCastException();
+                                    ThrowInvalidCast();
                                     return false;
                                 }
                             }
@@ -1396,6 +1397,352 @@ namespace Dpr.EvScript
             return true;
         }
 
+        private TrainerID GetArgTrainerID(EvScriptData ev, EvData.Aregment arg)
+        {
+            switch (arg.argType)
+            {
+                case EvData.ArgType.Work:
+                case EvData.ArgType.Float:
+                    return (TrainerID) GetWorkOrIntValue(arg);
+
+                case EvData.ArgType.String:
+                    string trainerName = ev.EvData.GetString(arg.data);
+                    for (int i=0; i<(int)TrainerID.MAX; i++)
+                    {
+                        if (trainerName == Enum.GetName(typeof(TrainerID), i))
+                        {
+                            return (TrainerID) i;
+                        }
+                    }
+                    return TrainerID.NONE;
+
+                default:
+                    return TrainerID.NONE;
+            }
+        }
+
+        private bool EvMacro_IF_TR_FLAGON_JUMP()
+        {
+            if (_evArg.Length < 2)
+            {
+                ThrowIndexOutOfRange();
+                return false;
+            }
+
+            TrainerID id = GetArgTrainerID(_evData, _evArg[1]);
+            //_cmp_flag = TrainerWork.GetWinFlag(id) ? CmpResult.EQUAL : CmpResult.MINUS;
+
+            if (_evArg.Length < 3)
+            {
+                ThrowIndexOutOfRange();
+                return false;
+            }
+
+            string label = "";
+            if (_evArg[2].argType == EvData.ArgType.String)
+            {
+                label = _evData.EvData.GetString(_evArg[2].data);
+            }
+
+            IfJump_Call(true, "FLGON", label);
+            return true;
+        }
+
+        private bool EvMacro_IF_TR_FLAGOFF_JUMP()
+        {
+            if (_evArg.Length < 2)
+            {
+                ThrowIndexOutOfRange();
+                return false;
+            }
+
+            TrainerID id = GetArgTrainerID(_evData, _evArg[1]);
+            //_cmp_flag = TrainerWork.GetWinFlag(id) ? CmpResult.EQUAL : CmpResult.MINUS;
+
+            if (_evArg.Length < 3)
+            {
+                ThrowIndexOutOfRange();
+                return false;
+            }
+
+            string label = "";
+            if (_evArg[2].argType == EvData.ArgType.String)
+            {
+                label = _evData.EvData.GetString(_evArg[2].data);
+            }
+
+            IfJump_Call(true, "FLGOFF", label);
+            return true;
+        }
+
+        private bool EvMacro_IF_TR_FLAGON_CALL()
+        {
+            if (_evArg.Length < 2)
+            {
+                ThrowIndexOutOfRange();
+                return false;
+            }
+
+            TrainerID id = GetArgTrainerID(_evData, _evArg[1]);
+            //if (!TrainerWork.GetWinFlag(id) || TrainerWork.GetBattleSearcher(id))
+            //{
+                //_cmp_flag = CmpResult.MINUS;
+            //}
+            //else
+            //{
+                //_cmp_flag = CmpResult.EQUAL;
+            //}
+
+            if (_evArg.Length < 3)
+            {
+                ThrowIndexOutOfRange();
+                return false;
+            }
+
+            string label = "";
+            if (_evArg[2].argType == EvData.ArgType.String)
+            {
+                label = _evData.EvData.GetString(_evArg[2].data);
+            }
+
+            IfJump_Call(false, "FLGON", label);
+            return true;
+        }
+
+        private bool EvMacro_IF_TR_FLAGOFF_CALL()
+        {
+            if (_evArg.Length < 2)
+            {
+                ThrowIndexOutOfRange();
+                return false;
+            }
+
+            TrainerID id = GetArgTrainerID(_evData, _evArg[1]);
+            //if (!TrainerWork.GetWinFlag(id) || TrainerWork.GetBattleSearcher(id))
+            //{
+                //_cmp_flag = CmpResult.MINUS;
+            //}
+            //else
+            //{
+                //_cmp_flag = CmpResult.EQUAL;
+            //}
+
+            if (_evArg.Length < 3)
+            {
+                ThrowIndexOutOfRange();
+                return false;
+            }
+
+            string label = "";
+            if (_evArg[2].argType == EvData.ArgType.String)
+            {
+                label = _evData.EvData.GetString(_evArg[2].data);
+            }
+
+            IfJump_Call(false, "FLGOFF", label);
+            return true;
+        }
+
+        private bool EvCmdWkAdd()
+        {
+            if (_evArg.Length < 2)
+            {
+                ThrowIndexOutOfRange();
+                return false;
+            }
+
+            int initialValue = GetWorkOrIntValue(_evArg[1]);
+
+            if (_evArg.Length < 3)
+            {
+                ThrowIndexOutOfRange();
+                return false;
+            }
+
+            int addedValue = GetWorkOrIntValue(_evArg[2]);
+
+            FlagWork.SetWork(_evArg[1].data, initialValue + addedValue);
+            return true;
+        }
+
+        private bool EvCmdWkSub()
+        {
+            if (_evArg.Length < 2)
+            {
+                ThrowIndexOutOfRange();
+                return false;
+            }
+
+            int initialValue = GetWorkOrIntValue(_evArg[1]);
+
+            if (_evArg.Length < 3)
+            {
+                ThrowIndexOutOfRange();
+                return false;
+            }
+
+            int addedValue = GetWorkOrIntValue(_evArg[2]);
+
+            FlagWork.SetWork(_evArg[1].data, initialValue - addedValue);
+            return true;
+        }
+
+        private bool EvCmdLoadWkValue()
+        {
+            if (_evArg.Length < 3)
+            {
+                ThrowIndexOutOfRange();
+                return false;
+            }
+
+            int newValue = GetWorkOrIntValue(_evArg[2]);
+
+            FlagWork.SetWork(_evArg[1].data, newValue);
+            return true;
+        }
+
+        private bool EvCmdLoadWkWk()
+        {
+            if (_evArg.Length < 3)
+            {
+                ThrowIndexOutOfRange();
+                return false;
+            }
+
+            int newValue = GetWorkOrIntValue(_evArg[2]);
+
+            FlagWork.SetWork(_evArg[1].data, newValue);
+            return true;
+        }
+
+        private bool EvCmdLoadWkWkValue()
+        {
+            if (_evArg.Length < 3)
+            {
+                ThrowIndexOutOfRange();
+                return false;
+            }
+
+            int newValue = GetWorkOrIntValue(_evArg[2]);
+
+            FlagWork.SetWork(_evArg[1].data, newValue);
+            return true;
+        }
+
+        private bool Cmd_TalkMsg(EvScriptData ev, bool index = false)
+        {
+            switch (_talkStart)
+            {
+                case TalkState.Init:
+                    if (ev.CommandIndex >= ev.GetScript.Commands.Count)
+                    {
+                        ThrowArgumentOutOfRange();
+                    }
+
+                    EvData.Command command = ev.GetScript.Commands[ev.CommandIndex];
+
+                    if (index)
+                    {
+                        if (command.Arg.Count < 2)
+                        {
+                            ThrowArgumentOutOfRange();
+                        }
+
+                        string file = "";
+                        if (command.Arg[1].argType == EvData.ArgType.String)
+                        {
+                            file = _evData.EvData.GetString(command.Arg[1].data);
+                        }
+
+                        _msgOpenParam.MsbtFile = file;
+                        _msgOpenParam.Label = "";
+
+                        if (command.Arg.Count < 3)
+                        {
+                            ThrowArgumentOutOfRange();
+                        }
+
+                        int workno = GetWorkOrIntValue(command.Arg[2]);
+                        _msgOpenParam.LabelIndex = workno;
+
+                        if (command.Arg.Count < 4)
+                        {
+                            _msgOpenParam.PlayTextFeedSe = false;
+                        }
+                        else
+                        {
+                            _msgOpenParam.PlayTextFeedSe = GetWorkOrIntValue(command.Arg[3]) == 1;
+                        }
+                    }
+                    else
+                    {
+                        if (command.Arg.Count < 2)
+                        {
+                            ThrowArgumentOutOfRange();
+                        }
+
+                        string label = "";
+                        if (command.Arg[1].argType == EvData.ArgType.String)
+                        {
+                            label = _evData.EvData.GetString(command.Arg[1].data);
+                        }
+                        string[] file = label.Split('%');
+
+                        if (file.Length < 1)
+                        {
+                            ThrowIndexOutOfRange();
+                        }
+
+                        _msgOpenParam.MsbtFile = file[0];
+
+                        if (file.Length < 2)
+                        {
+                            ThrowIndexOutOfRange();
+                        }
+
+                        _msgOpenParam.Label = file[1];
+
+                        if (command.Arg.Count < 3)
+                        {
+                            _msgOpenParam.PlayTextFeedSe = false;
+                        }
+                        else
+                        {
+                            _msgOpenParam.PlayTextFeedSe = GetWorkOrIntValue(command.Arg[2]) == 1;
+                        }
+                    }
+
+                    _msgOpenParam.WindowType = MsgWindowType.DEFAULT;
+                    _msgOpenParam.Input = true;
+                    _msgOpenParam.EndType = MsgEndType.Input;
+                    OpenTalk(_msgOpenParam);
+                    _talkStart = TalkState.EndWait;
+                    return false;
+
+                case TalkState.EndWait:
+                    if (_msgWindowCoroutine != null)
+                    {
+                        return false;
+                    }
+                    _talkStart = TalkState.Init;
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
+        private bool OpenTalk(MsgOpenParam msgparam)
+        {
+            if (_msgWindowCoroutine != null)
+            {
+                Sequencer.Stop(_msgWindowCoroutine);
+            }
+
+            // TODO
+            return true;
+        }
+
         private bool EvCmdEventCameraIndex()
         {
             if (_evArg.Length < 2)
@@ -1405,7 +1752,7 @@ namespace Dpr.EvScript
             }
 
             int index = GetWorkOrIntValue(_evArg[1]);
-            GameManager.fieldCamera.EventCamera.SetCameraData(_evCameraTable, index);
+            //GameManager.fieldCamera.EventCamera.SetCameraData(_evCameraTable, index);
 
             return true;
         }
@@ -1631,6 +1978,133 @@ namespace Dpr.EvScript
                             return true;
                         }
 
+                    case EvCmdID.NAME._FLAG_SET_WK:
+                        {
+                            if (_evArg.Length < 2)
+                            {
+                                ThrowIndexOutOfRange();
+                                return true;
+                            }
+
+                            int flagNo = GetWorkOrIntValue(_evArg[1]);
+                            
+                            if (flagNo < 0)
+                            {
+                                return true;
+                            }
+
+                            FlagWork.SetFlag(flagNo, true);
+                            return true;
+                        }
+
+                    case EvCmdID.NAME._TRAINER_FLAG_SET:
+                        {
+                            if (_evArg.Length < 2)
+                            {
+                                ThrowIndexOutOfRange();
+                                return true;
+                            }
+
+                            TrainerID id = GetArgTrainerID(_evData, _evArg[1]);
+                            //TrainerWork.SetWinFlag(id);
+                            //TrainerWork.SetBattleSaercher(id);
+                            return true;
+                        }
+
+                    case EvCmdID.NAME._TRAINER_FLAG_RESET:
+                        {
+                            if (_evArg.Length < 2)
+                            {
+                                ThrowIndexOutOfRange();
+                                return true;
+                            }
+
+                            TrainerID id = GetArgTrainerID(_evData, _evArg[1]);
+                            //TrainerWork.ResetWinFlag(id);
+                            //TrainerWork.ReSetBattleSaercher(id);
+                            return true;
+                        }
+
+                    case EvCmdID.NAME._TRAINER_FLAG_CHECK:
+                        {
+                            if (_evArg.Length < 2)
+                            {
+                                ThrowIndexOutOfRange();
+                                return true;
+                            }
+
+                            TrainerID id = GetArgTrainerID(_evData, _evArg[1]);
+                            //if (!TrainerWork.GetWinFlag(id) || TrainerWork.GetBattleSearcher(id))
+                            //{
+                                //_cmp_flag = CmpResult.MINUS;
+                            //}
+                            //else
+                            //{
+                                //_cmp_flag = CmpResult.EQUAL;
+                            //}
+
+                            return true;
+                        }
+
+                    case EvCmdID.NAME._IF_TR_FLAGON_JUMP:
+                        {
+                            EvMacro_IF_TR_FLAGON_JUMP();
+                            return true;
+                        }
+
+                    case EvCmdID.NAME._IF_TR_FLAGOFF_JUMP:
+                        {
+                            EvMacro_IF_TR_FLAGOFF_JUMP();
+                            return true;
+                        }
+
+                    case EvCmdID.NAME._IF_TR_FLAGON_CALL:
+                        {
+                            EvMacro_IF_TR_FLAGON_CALL();
+                            return true;
+                        }
+
+                    case EvCmdID.NAME._IF_TR_FLAGOFF_CALL:
+                        {
+                            EvMacro_IF_TR_FLAGOFF_CALL();
+                            return true;
+                        }
+
+                    case EvCmdID.NAME._ADD_WK:
+                        {
+                            EvCmdWkAdd();
+                            return true;
+                        }
+
+                    case EvCmdID.NAME._SUB_WK:
+                        {
+                            EvCmdWkSub();
+                            return true;
+                        }
+
+                    case EvCmdID.NAME._LDVAL:
+                        {
+                            EvCmdLoadWkValue();
+                            return true;
+                        }
+
+                    case EvCmdID.NAME._LDWK:
+                        {
+                            EvCmdLoadWkWk();
+                            return true;
+                        }
+
+                    case EvCmdID.NAME._LDWKVAL:
+                        {
+                            EvCmdLoadWkWkValue();
+                            return true;
+                        }
+
+                    case EvCmdID.NAME._TALKMSG:
+                        {
+                            return Cmd_TalkMsg(_evData, false);
+                        }
+
                     case EvCmdID.NAME._EVENT_CAMERA_INDEX:
                         {
                             EvCmdEventCameraIndex();
@@ -1661,7 +2135,7 @@ namespace Dpr.EvScript
         }
 
         // Not an actual method, here to simplify the code.
-        // Throws an index out of range exception.
+        // Throws an IndexOutOfRange exception.
         private void ThrowIndexOutOfRange()
         {
             // TODO
@@ -1669,11 +2143,19 @@ namespace Dpr.EvScript
         }
 
         // Not an actual method, here to simplify the code.
-        // Throws an index out of range exception.
-        private void ThrowInvalidCastException()
+        // Throws an InvalidCast exception.
+        private void ThrowInvalidCast()
         {
             // TODO
             throw new InvalidCastException();
+        }
+
+        // Not an actual method, here to simplify the code.
+        // Throws an ArgumentOutOfRange exception.
+        private void ThrowArgumentOutOfRange()
+        {
+            // TODO
+            throw new ArgumentOutOfRangeException();
         }
 
         // Not an actual method, here to simplify the code.

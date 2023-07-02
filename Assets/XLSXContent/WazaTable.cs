@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pml;
+using System;
 using UnityEngine;
 
 namespace XLSXContent
@@ -25,11 +26,7 @@ namespace XLSXContent
         [Serializable]
         public class SheetWaza
         {
-            public SheetWaza()
-            {
-            }
-
-            public int wazaNo;
+            public WazaNo wazaNo;
 
             public bool isValid;
 

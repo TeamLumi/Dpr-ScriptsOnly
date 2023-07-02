@@ -1,7 +1,12 @@
-﻿using System;
+﻿using SmartPoint.Components;
+using System;
+using System.IO;
+using System.Numerics;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 
 public class PlayerWork
 {
@@ -45,7 +50,7 @@ public class PlayerWork
 
         public int version;
 
-        public GameObject intValues;
+        public byte[] intValues { get; set; }
 
         public GameObject boolValues;
 
@@ -184,8 +189,6 @@ public class PlayerWork
 
     public GameObject _loadResult;
 
-    public GameObject _battleSetupParam;
-
     public GameObject _playerParty;
 
     public GameObject _capturedPokemon;
@@ -264,15 +267,11 @@ public class PlayerWork
 
     public GameObject _003CSafariCaptureMonsNo_003Ek__BackingField;
 
-    public int _003CIsCpuBoostMode_003Ek__BackingField;
-
     public GameObject _003CUsedFieldItem_003Ek__BackingField;
 
     public GameObject _003CUsedFieldWazaNo_003Ek__BackingField;
 
     public int _003CUsedFieldWazaTemotiNo_003Ek__BackingField;
-
-    public bool _003CFlash_003Ek__BackingField;
 
     public GameObject UsedFieldWazaInArea;
 
@@ -576,7 +575,12 @@ public class PlayerWork
         }
     }
 
-    public static object battleSetupParam => null;
+    public GameObject GetBattleSetupParam()
+    {
+        //var instance = PlayerPrefsProvider<ViewerSettings>.GetInstance();
+        //return instance.Blurry;
+        return null;
+    }
 
     public static object playerParty => null;
 
@@ -617,14 +621,15 @@ public class PlayerWork
 
     public static bool isDebugDash => false;
 
-    public static bool isDebugWalk
+    public static bool IsDebugWalk
     {
         get
         {
-            return false;
+            return IsDebugWalk;
         }
         set
         {
+            IsDebugWalk = value;
         }
     }
 
@@ -1064,7 +1069,7 @@ public class PlayerWork
         }
     }
 
-    public static Vector3 UgReturnPos
+    public static UnityEngine.Vector3 UgReturnPos
     {
         //get
         //{
@@ -1136,16 +1141,7 @@ public class PlayerWork
         }
     }
 
-    public static int IsCpuBoostMode
-    {
-        get
-        {
-            return 0;
-        }
-        set
-        {
-        }
-    }
+    public int IsCpuBoostMode { get; set; }
 
     public static object UsedFieldItem
     {
@@ -1191,16 +1187,7 @@ public class PlayerWork
         }
     }
 
-    public static bool Flash
-    {
-        get
-        {
-            return false;
-        }
-        set
-        {
-        }
-    }
+    public bool Flash { get; set; }
 
     public static object SystemData
     {
@@ -1375,33 +1362,176 @@ public class PlayerWork
     //{
     //}
 
-    private object ToBytes<T>(object obj)
+    public static byte[] StructToBytes<T>(T strct) where T : struct
     {
-        return null;
+        int size = Marshal.SizeOf(strct);
+        byte[] arr = new byte[size];
+
+        IntPtr ptr = Marshal.AllocHGlobal(size);
+        Marshal.StructureToPtr(strct, ptr, true);
+        Marshal.Copy(ptr, arr, 0, size);
+        Marshal.FreeHGlobal(ptr);
+        return arr;
     }
 
-    private void LoadBytes<T>(object bytes, object obj)
+    public static byte[] ObjectToByteArray<T>(T obj)
     {
+        if (obj == null)
+            return null;
+        BinaryFormatter bf = new BinaryFormatter();
+        using (MemoryStream ms = new MemoryStream())
+        {
+            bf.Serialize(ms, obj);
+            return ms.ToArray();
+        }
     }
+
+    public void ToBytes<T>(T obj, ref byte[] bytes)
+    {
+        if (bytes == null)
+        {
+            throw new ArgumentNullException(nameof(bytes));
+        }
+
+        int size = Marshal.SizeOf(obj);
+        IntPtr ptr = Marshal.AllocHGlobal(size);
+
+        Marshal.StructureToPtr(obj, ptr, true);
+        Marshal.Copy(ptr, bytes, 0, size);
+        Marshal.FreeHGlobal(ptr);
+    }
+
+    public byte[] ToBytes<T>(byte[] bytes, ref T obj)
+    {
+        if (typeof(T) == typeof(PlayerWork.SaveData))
+        {
+            byte[] byteArray = ObjectToByteArray(obj);
+
+            // Copy the data from the bytes array to the structure
+            //Buffer.BlockCopy(bytes, 0, obj, 0, bytes.Length);
+            Buffer.BlockCopy(bytes, 0, byteArray, 0, bytes.Length);
+
+            // Get the size of the structure
+            int size = Marshal.SizeOf(obj);
+
+            // Allocate memory for the structure
+            IntPtr ptr = Marshal.AllocHGlobal(size);
+
+            // Copy the structure to the allocated memory
+            Marshal.StructureToPtr(obj, ptr, false);
+
+            // Create a byte array to hold the marshaled data
+            byte[] marshaledData = new byte[size];
+
+            // Copy the marshaled data to the byte array
+            Marshal.Copy(ptr, marshaledData, 0, size);
+
+            // Free the allocated memory
+            Marshal.FreeHGlobal(ptr);
+
+            // Return the marshaled data
+            return marshaledData;
+        }
+        else
+        {
+            throw new ArgumentException("Invalid type for ToBytes method.");
+        }
+    }
+
+    public void LoadBytes(byte[] bytes, SaveData obj)
+    {
+        int size = Marshal.SizeOf(typeof(SaveData));
+        IntPtr destination = Marshal.AllocHGlobal(size);
+
+        int length = Math.Min(bytes.Length, size);
+        Marshal.Copy(bytes, 0, destination, length);
+
+        Type type = typeof(SaveData);
+        SaveData dataFromBytes = (SaveData)Marshal.PtrToStructure(destination, type);
+
+        if (dataFromBytes != null)
+        {
+            if (dataFromBytes.GetType() == type)
+            {
+                obj = dataFromBytes;
+                obj.intValues = new byte[0]; // Initialize to empty array
+            }
+            else
+            {
+                throw new InvalidCastException();
+            }
+        }
+        else
+        {
+            throw new Exception("Failed to convert bytes to structure.");
+        }
+
+        Marshal.FreeHGlobal(destination);
+    }
+
+    void LoadBytes<T>(byte[] bytes, ref T obj)
+    {
+        //if (!initialized)
+        //{
+            // system_load_typeinfo((void *)0x6ab6);
+            //initialized = true;
+        //}
+
+        int size = Marshal.SizeOf(obj);
+        IntPtr destination = Marshal.AllocHGlobal(size);
+
+        size = Math.Min(bytes.Length, size);
+        Marshal.Copy(bytes, 0, destination, size);
+
+        Type type = typeof(T);
+        object structure = Marshal.PtrToStructure(destination, type);
+
+        if (structure == null)
+        {
+            obj = default(T);
+        }
+        else
+        {
+            obj = (T)structure;
+        }
+
+        Marshal.FreeHGlobal(destination);
+    }
+
 
     //protected override bool CustomLoadOperation()
     //{
-        //return false;
+    //return false;
     //}
 
     //protected override bool CustomSaveOperation()
     //{
-        //return false;
+    //return false;
     //}
 
-    //protected override bool CustomLoadAsyncOperation()
-    //{
-        //return false;
-    //}
+
+    public bool CustomLoadAsyncOperation()
+    {
+        bool _evolveRequets;
+
+        //Action<bool> onComplete = new Action<bool>(/* some method */);
+
+        //if ((Dpr.NX.SaveSystem_TypeInfo._2.bitflags2 >> 1 & 1) != 0 &&
+            //Dpr.NX.SaveSystem_TypeInfo._2.cctor_finished == 0)
+        //{
+            //Dpr.NX.SaveSystem_TypeInfo.il2cpp_runtime_class_init(); // Assuming il2cpp_runtime_class_init is a method of Dpr.NX.SaveSystem_TypeInfo
+        //}
+
+        //Dpr.NX.SaveSystem.LoadAsync(cVar1 != false, onComplete, null); // Assuming LoadAsync is a method of Dpr.NX.SaveSystem
+
+        _evolveRequets = false;
+
+        return true;
+    }
 
     //protected override bool CustomSaveAsyncOperation()
     //{
-        //return false;
+    //return false;
     //}
 
     //protected override void OnPostLoad()
@@ -1611,8 +1741,12 @@ public class PlayerWork
     {
     }
 
-    public static void GetDateTime(object year, object month, object day)
+    public static void GetDateTime(out int year, out int month, out int day)
     {
+        DateTime nowTime = GameManager.NowTime;
+        year = nowTime.Year;
+        month = nowTime.Month;
+        day = nowTime.Day;
     }
 
     public static void SetPlayerStatus(int selectIndex, string name)

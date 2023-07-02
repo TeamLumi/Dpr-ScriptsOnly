@@ -1,7 +1,8 @@
-﻿using Dpr.Trainer;
+﻿//using Dpr.Trainer;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Diagnostics;
 
@@ -31,8 +32,8 @@ public class FieldManager
     private GameObject _weather; // FieldWeather
     public GameObject MistWork; // FieldMistWork
     public GameObject FlashWork; // FieldFlashWork
-    private TrainerID _btl_trainerID1;
-    private TrainerID _btl_trainerID2;
+    //private TrainerID _btl_trainerID1;
+    //private TrainerID _btl_trainerID2;
     private GameObject _ug_hole;
     private bool _is_ugHoleLock;
     private Vector3 _ugHolePos;
@@ -199,9 +200,221 @@ public class FieldManager
         {
             return null;
         }
-        set
+        private set
         {
-
         }
+    }
+
+    private class AutoSaveCoroutine : IEnumerator
+    {
+        private int _state;
+        private object _current;
+
+        public AutoSaveCoroutine(int state)
+        {
+            _state = state;
+        }
+
+        public bool MoveNext()
+        {
+            switch (_state)
+            {
+                case 0:
+                    _state = -1;
+                    // Insert logic here
+                    _current = null;
+                    _state = 1;
+                    return true;
+                case 1:
+                    _state = -1;
+                    // Insert logic here
+                    _current = null;
+                    _state = 2;
+                    return true;
+                case 2:
+                    _state = -1;
+                    // Insert logic here
+                    return false;
+                default:
+                    return false;
+            }
+        }
+
+        public void Reset()
+        {
+            throw new NotSupportedException();
+        }
+
+        public object Current
+        {
+            get { return _current; }
+        }
+
+        public void Dispose()
+        {
+        }
+    }
+
+    private class AutoSaveWindowAnime : IEnumerator
+    {
+        private int _state;
+        private object _current;
+
+        public AutoSaveWindowAnime(int state)
+        {
+            _state = state;
+        }
+
+        public bool MoveNext()
+        {
+            switch (_state)
+            {
+                case 0:
+                    _state = -1;
+                    // Insert logic here
+                    _current = null;
+                    _state = 1;
+                    return true;
+                case 1:
+                    _state = -1;
+                    // Insert logic here
+                    _current = null;
+                    _state = 2;
+                    return true;
+                case 2:
+                    _state = -1;
+                    // Insert logic here
+                    return false;
+                default:
+                    return false;
+            }
+        }
+
+        public void Reset()
+        {
+            throw new NotSupportedException();
+        }
+
+        public object Current
+        {
+            get { return _current; }
+        }
+
+        public void Dispose()
+        {
+        }
+    }
+
+
+    [StructLayout(LayoutKind.Sequential)]
+    public sealed class AttributeEvent : ScriptableObject
+    {
+        public int chartype;
+
+        public bool isRun;
+
+        public bool isBic;
+
+        public GameObject entity;
+
+        public GameObject eventType;
+
+        public GameObject callType;
+    }
+
+    public sealed class AttributeEventCallType : ScriptableObject
+    {
+        public int value__;
+
+        public GameObject Player;
+
+        public GameObject NPC_Heel;
+
+        public GameObject NPC;
+    }
+
+    public sealed class AttributeEventType : ScriptableObject
+    {
+        public int value__;
+
+        public GameObject Run;
+
+        public GameObject Jump;
+    }
+
+    public sealed class AutoSaveState : ScriptableObject
+    {
+        public int value__;
+
+        public GameObject None;
+
+        public GameObject Zone_Change;
+
+        public GameObject BattleResult;
+
+        public GameObject EventScript;
+
+        public GameObject Stop;
+    }
+
+    public sealed class EncountFadeType : ScriptableObject
+    {
+        public int value__;
+
+        public GameObject Normal;
+
+        public GameObject Trainer;
+    }
+
+    private sealed class EncountUpdateType : ScriptableObject
+    {
+        public int value__;
+
+        public GameObject CallEffect;
+
+        public GameObject EndWait;
+
+        public GameObject CallBackWait;
+
+        public GameObject TrainerEffWait;
+
+        public GameObject End;
+    }
+
+    public sealed class FieldWazaAction
+    {
+        public extern FieldWazaAction(object @object, IntPtr method);
+
+        public extern bool Invoke(bool deltatime);
+
+        public extern IAsyncResult BeginInvoke(bool deltatime, AsyncCallback callback, object @object);
+
+        public extern bool EndInvoke(IAsyncResult result);
+    }
+
+    private class LoadEffectData : ScriptableObject
+    {
+        public string name;
+
+        public GameObject effect;
+
+        public bool isLoading;
+
+        public bool isComplete;
+    }
+
+    public sealed class UpdateType : ScriptableObject
+    {
+        public int value__;
+
+        public GameObject Field;
+
+        public GameObject UnderGround;
+
+        public GameObject Encount;
+
+        public GameObject Fishing;
+
+        public GameObject DemoWait;
     }
 }
