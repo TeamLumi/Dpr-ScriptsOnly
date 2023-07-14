@@ -7,7 +7,7 @@ namespace SmartPoint.AssetAssistant
     [Serializable]
     public struct ReferenceObject
     {
-        public UnityEngine.Object asset;
+        public UnityEngine.GameObject asset;
 
         public string path;
     }

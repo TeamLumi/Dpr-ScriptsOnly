@@ -7,12 +7,23 @@ namespace SmartPoint.AssetAssistant
 {
     public class StartupSettings : SingletonScriptableObject<StartupSettings>
     {
-        public static string platformName
+        private static StartupSettings instance;
+
+        public static string GetPlatformName()
         {
-            get
+            var x = GetInstance();
+            string platformName = null;
+
+            if (x != null)
             {
-                return null;
+                platformName = x.ToString(); // Assuming the instance can be converted to a string
             }
+            else
+            {
+                platformName = ""; // Default value in case instance is null, adjust as needed
+            }
+
+            return platformName;
         }
 
         public static MessageBoxManifestBase messageBoxManifest
@@ -23,36 +34,86 @@ namespace SmartPoint.AssetAssistant
             }
         }
 
-        public static bool useSceneBrowser
+        public static bool GetUseSceneBrowser()
         {
-            get
+            var x = GetInstance();
+
+            if (x == null)
             {
-                return default(bool);
+                return true;
             }
+
+            // Assuming instance has a property "UseSceneBrowser" of type bool.
+            // This will depend on your specific application and might need to be adjusted.
+            return (StartupSettings.instance).UseSceneBrowser;
         }
 
-        public static string assetBundleTargetURI
+        public static string GetAssetBundleTargetURI()
         {
-            get
+            var x = GetInstance();
+            string assetBundleTargetURI = null;
+
+            if (x != null)
             {
-                return null;
+                assetBundleTargetURI = (StartupSettings.instance).AssetBundleTargetURI;
             }
+            else
+            {
+                assetBundleTargetURI = ""; // Default value in case instance is null, adjust as needed
+            }
+
+            return assetBundleTargetURI;
         }
 
-        public static string[] assetBundlesForEditor
+        public static string[] GetAssetBundlesForEditor()
         {
-            get
+            var x = GetInstance();
+            string[] assetBundlesForEditor;
+
+            if (x != null)
             {
-                return null;
+                assetBundlesForEditor = (StartupSettings.instance).AssetBundlesForEditor;
             }
+            else
+            {
+                assetBundlesForEditor = new string[0]; // Default value in case instance is null, adjust as needed
+            }
+
+            return assetBundlesForEditor;
         }
 
-        public static string[] externalProjectNames
+        public static string[] GetExternalProjectNames()
         {
-            get
+            var x = GetInstance();
+            string[] externalProjectNames;
+
+            if (x != null)
             {
-                return null;
+                externalProjectNames = (StartupSettings.instance).ExternalProjectNames;
             }
+            else
+            {
+                externalProjectNames = new string[0]; // Default value in case instance is null, adjust as needed
+            }
+
+            return externalProjectNames;
+        }
+
+        public static AssetBundleTarget GetAssetBundleTarget()
+        {
+            var x = GetInstance();
+            AssetBundleTarget assetBundleTarget;
+
+            if (x != null)
+            {
+                assetBundleTarget = (StartupSettings.instance).AssetBundleTarget;
+            }
+            else
+            {
+                assetBundleTarget = 0; // Default value in case instance is null
+            }
+
+            return assetBundleTarget;
         }
 
         public static AssetBundleTarget assetBundleTarget
@@ -63,12 +124,21 @@ namespace SmartPoint.AssetAssistant
             }
         }
 
-        public static bool runBootSequence
+        public static bool GetRunBootSequence()
         {
-            get
+            var x = GetInstance();
+            bool runBootSequence;
+
+            if (x != null)
             {
-                return default(bool);
+                runBootSequence = (StartupSettings.instance).RunBootSequence;
             }
+            else
+            {
+                runBootSequence = false; // Default value in case instance is null
+            }
+
+            return runBootSequence;
         }
 
         public static int minimumResolution
@@ -79,19 +149,29 @@ namespace SmartPoint.AssetAssistant
             }
         }
 
-        public static bool clearCacheFiles
+        public static bool GetClearCacheFiles()
         {
-            get
+            var x = GetInstance();
+            bool clearCacheFiles;
+
+            if (x != null)
             {
-                return default(bool);
+                clearCacheFiles = (StartupSettings.instance).ClearCacheFiles;
             }
+            else
+            {
+                clearCacheFiles = false; // Default value in case instance is null
+            }
+
+            return clearCacheFiles;
         }
 
         public static bool webhookInEditMode
         {
             get
             {
-                return default(bool);
+                var instance = GetInstance();
+                return instance.WebhookInEditMode;
             }
         }
 
@@ -99,25 +179,62 @@ namespace SmartPoint.AssetAssistant
         {
             get
             {
-                return null;
+                var instance = GetInstance();
+                return instance != null ? instance.WebhookURL : null;
             }
         }
 
-        public static string startupScenePath
+        public static string GetStartupScenePath()
         {
-            get
+            var x = GetInstance();
+            string startupScenePath;
+
+            if (x != null)
             {
-                return null;
+                startupScenePath = (StartupSettings.instance).StartupScenePath;
             }
+            else
+            {
+                startupScenePath = string.Empty; // Default value in case instance is null
+            }
+
+            return startupScenePath;
         }
 
-        //public static PreloadRequest[] preloadRequests
-        //{
-            //get
-            //{
-                //return null;
-            //}
-        //}
+        public static PreloadRequest[] GetPreloadRequests()
+        {
+            var x = GetInstance();
+            PreloadRequest[] preloadRequests;
+
+            if (x != null)
+            {
+                preloadRequests = (StartupSettings.instance).PreloadRequests;
+            }
+            else
+            {
+                preloadRequests = null; // Default value in case instance is null
+            }
+
+            return preloadRequests;
+        }
+
+        public static void GetPreloadMethod(out object preloadMethod)
+        {
+            if (instance == null)
+            {
+                // Load or initialize instance
+                instance = FindObjectOfType<StartupSettings>();
+            }
+
+            if (instance == null)
+            {
+                // Set output to null if instance is still null after trying to find it
+                preloadMethod = null;
+                return;
+            }
+
+            preloadMethod = instance.PreloadMethod;
+        }
 
         public static SerializedMethod preloadMethod
         {
@@ -131,8 +248,26 @@ namespace SmartPoint.AssetAssistant
         {
             get
             {
-                return null;
+                var instance = GetInstance();
+                return instance != null ? instance.InitializeMethods : null;
             }
+        }
+
+        public static SerializedMethod[] GetAssetManagerAfterSetupMethods()
+        {
+            if (instance == null)
+            {
+                // Load or initialize instance
+                instance = FindObjectOfType<StartupSettings>();
+            }
+
+            if (instance == null)
+            {
+                // Create an empty array if instance is still null after trying to find it
+                return new SerializedMethod[0];
+            }
+
+            return instance.AssetManagerAfterSetupMethods;
         }
 
         public static SerializedMethod[] assetManagerAfterSetupMethods
@@ -143,12 +278,38 @@ namespace SmartPoint.AssetAssistant
             }
         }
 
-        public static SerializedMethod[] sceneRestoreOperationMethods
+        public static SerializedMethod[] GetSceneRestoreOperationMethods()
         {
-            get
+            if (instance == null)
             {
-                return null;
+                // Load or initialize instance
+                instance = FindObjectOfType<StartupSettings>();
             }
+
+            if (instance == null)
+            {
+                // Create an empty array if instance is still null after trying to find it
+                return new SerializedMethod[0];
+            }
+
+            return instance.SceneRestoreOperationMethods;
+        }
+
+        public static SerializedMethod[] GetSceneBeforeActivateOperationMethods()
+        {
+            if (instance == null)
+            {
+                // Load or initialize instance
+                instance = FindObjectOfType<StartupSettings>();
+            }
+
+            if (instance == null)
+            {
+                // Create an empty array if instance is still null after trying to find it
+                return new SerializedMethod[0];
+            }
+
+            return instance.SceneBeforeActivateOperationMethods;
         }
 
         public static SerializedMethod[] sceneBeforeActivateOperationMethods
@@ -159,98 +320,151 @@ namespace SmartPoint.AssetAssistant
             }
         }
 
-        public static ReferenceObject[] permanentObjects
+        public static ReferenceObject[] GetPermanentObjects()
         {
-            get
+            if (instance == null)
             {
+                // Load or initialize instance
+                instance = FindObjectOfType<StartupSettings>();
+            }
+
+            if (instance == null)
+            {
+                // Return null if instance is still null after trying to find it
                 return null;
             }
+
+            return instance.PermanentObjects;
         }
 
-        public static string buildVersion
+        public static StartupSettings GetInstance()
         {
-            get
+            if (instance == null)
             {
-                return null;
+                instance = Resources.Load<StartupSettings>("StartupSettings");
+
+                if (instance == null)
+                {
+                    instance = ScriptableObject.CreateInstance<StartupSettings>();
+                }
             }
+
+            return instance;
         }
 
-        public static string creationTime
+        public static string GetBuildVersion()
         {
-            get
+            if (instance == null)
             {
-                return null;
+                // Load or initialize instance
+                instance = FindObjectOfType<StartupSettings>();
             }
+
+            if (instance == null)
+            {
+                // Return default string if instance is still null after trying to find it
+                return string.Empty; // Replace with the correct default value
+            }
+
+            return instance.BuildVersion;
         }
+
+        public static string GetCreationTime()
+        {
+            if (instance == null)
+            {
+                // Load or initialize instance
+                instance = FindObjectOfType<StartupSettings>();
+            }
+
+            if (instance == null)
+            {
+                // Return default string if instance is still null after trying to find it
+                return "Uninitialized"; // Replace with the correct default value
+            }
+
+            return instance.CreationTime;
+        }
+
+        [SerializeField]
+        public bool UseSceneBrowser;
+
+        [SerializeField]
+        public string WebhookURL;
+
+        [SerializeField]
+        public PreloadRequest[] PreloadRequests;
+
+        [SerializeField]
+        public SerializedMethod[] InitializeMethods;
+
+        [SerializeField]
+        public SerializedMethod[] AssetManagerAfterSetupMethods;
+
+        [SerializeField]
+        public SerializedMethod[] SceneRestoreOperationMethods;
+
+        [SerializeField]
+        public SerializedMethod[] SceneBeforeActivateOperationMethods;
+
+        [SerializeField]
+        public string StartupScenePath;
+
+        [SerializeField]
+        public ReferenceObject[] PermanentObjects;
+
+        [SerializeField]
+        public bool RunBootSequence;
+
+        [SerializeField]
+        public string CreationTime;
+
+        [SerializeField]
+        public string BuildVersion;
 
         public StartupSettings()
         {
+            UseSceneBrowser = true;
+            WebhookURL = string.Empty;
+            PreloadRequests = new PreloadRequest[0];
+            InitializeMethods = new SerializedMethod[0];
+            AssetManagerAfterSetupMethods = new SerializedMethod[0];
+            SceneRestoreOperationMethods = new SerializedMethod[0];
+            SceneBeforeActivateOperationMethods = new SerializedMethod[0];
+            StartupScenePath = string.Empty;
+            PermanentObjects = new ReferenceObject[0];
+            RunBootSequence = true;
+            CreationTime = string.Empty;
+            BuildVersion = string.Empty;
         }
+        [SerializeField]
+        public string _platformName;
 
         [SerializeField]
-        private string _platformName;
+        public MessageBoxManifestBase _messageBoxManifest;
 
         [SerializeField]
-        private bool _useSceneBrowser;
+        public AssetBundleTarget AssetBundleTarget;
 
         [SerializeField]
-        private MessageBoxManifestBase _messageBoxManifest;
+        public string AssetBundleTargetURI;
 
         [SerializeField]
-        private AssetBundleTarget _assetBundleTarget;
+        public string[] AssetBundlesForEditor;
 
         [SerializeField]
-        private string _assetBundleTargetURI;
+        public string[] ExternalProjectNames;
 
         [SerializeField]
-        private string[] _assetBundlesForEditor;
+        public bool ClearCacheFiles;
 
         [SerializeField]
-        private string[] _externalProjectNames;
+        public bool WebhookInEditMode;
 
         [SerializeField]
-        private bool _clearCacheFiles;
+        public int MinimumResolution;
 
         [SerializeField]
-        private bool _webhookInEditMode;
-
-        [SerializeField]
-        private string _webhookURL;
-
-        [SerializeField]
-        private int _minimumResolution;
-
-        //[SerializeField]
-        //private PreloadRequest[] _preloadRequests;
-
-        [SerializeField]
-        private SerializedMethod _preloadMethod;
-
-        [SerializeField]
-        private SerializedMethod[] _initializeMethods;
-
-        [SerializeField]
-        private SerializedMethod[] _assetManagerAfterSetupMethods;
-
-        [SerializeField]
-        private SerializedMethod[] _sceneRestoreOperationMethods;
-
-        [SerializeField]
-        private SerializedMethod[] _sceneBeforeActivateOperationMethods;
-
-        [SerializeField]
-        private string _startupScenePath;
-
-        [SerializeField]
-        private ReferenceObject[] _permanentObjects;
-
-        [SerializeField]
-        private bool _runBootSequence;
-
-        [SerializeField]
-        private string _creationTime;
-
-        [SerializeField]
-        private string _buildVersion;
+        public SerializedMethod PreloadMethod;
     }
 }

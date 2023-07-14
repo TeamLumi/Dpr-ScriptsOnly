@@ -7,7 +7,7 @@ public static class GFL
     {
         if (!condition)
         {
-            Debug.LogError("Assertion failed");
+            Logger.Log("Assertion failed");
         }
     }
 
@@ -15,7 +15,7 @@ public static class GFL
     {
         if (!condition)
         {
-            Debug.LogError($"Assertion failed: {format}");
+            Logger.Log($"Assertion failed: {format}");
         }
     }
 }

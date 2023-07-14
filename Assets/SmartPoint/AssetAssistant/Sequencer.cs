@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SmartPoint.AssetAssistant.Forms;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -8,11 +9,22 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Networking;
+using static SmartPoint.AssetAssistant.Sequencer;
+using static UnityEngine.Application;
+using static Dpr.LogSender;
+using Dpr;
 
 namespace SmartPoint.AssetAssistant
 {
     public sealed class Sequencer : SingletonMonoBehaviour<Sequencer>
     {
+        public enum WebhookTarget
+        {
+            None,
+            Discord,
+            Slack,
+        }
+
         public const int StringBuilderCapaity = 1024;
         private static IUnityEditorProxy _editorProxy;
         private static List<(int, TickCallback)> _orderableList;
@@ -93,7 +105,85 @@ namespace SmartPoint.AssetAssistant
             }
         }
 
-        protected override bool Awake() => new bool();
+        public void Awake()
+        {
+            StartupSettings StartupSettings = Resources.Load<StartupSettings>("StartupSettings");
+            Dpr.LogSender.Instance.Init(this, StartupSettings.webhookURL);
+
+            // Union Room stuff
+            //if (!SingletonMonoBehaviour<UnionRoomManager>.Awake(this))
+            //{
+            //return false;
+            //}
+
+            //int id = 0;
+            //while (true)
+            //{
+            //if (id >= 256)
+            //{
+            //break;
+            //}
+            //var item = new LogMessage(id);
+            //this.MessageList.Add(item);
+            //id++;
+            //}
+
+            if (!string.IsNullOrEmpty(StartupSettings.webhookURL))
+            {
+                if (!Application.isEditor || StartupSettings.webhookInEditMode)
+                {
+                    if (StartupSettings.webhookURL.Contains("discord"))
+                    {
+                        _webhookTarget = WebhookTarget.Discord;
+                        Logger.Log("Boot Initialized");
+                    }
+                    if (StartupSettings.webhookURL.Contains("slack"))
+                    {
+                        _webhookTarget = WebhookTarget.Slack;
+                        Logger.Log("Boot Initialized");
+                    }
+                    else
+                    {
+                        _webhookTarget = WebhookTarget.None;
+                        Logger.Log("No Webhook Found.");
+                    }
+                }
+            }
+
+            int userFramerate = 30;
+            Application.targetFrameRate = userFramerate;
+
+            string productName = Application.productName;
+            Logger.Log($"Product Name: {productName}");
+
+            nativeScreenWidth = Screen.width;
+            nativeScreenHeight = Screen.height;
+            nativeAspectRatio = (float)Screen.width / (float)Screen.height;
+
+            start?.Invoke();
+
+            start = null;
+
+            //MessageBoxManifestBase messageBoxManifest = StartupSettings.messageBoxManifest;
+            //MessageBox.Manifest = messageBoxManifest;
+            
+            // NexInitializer
+
+            // EventSystem
+
+            // AudioManager
+
+            // UIManager
+
+            // EffectManager
+
+            // FontManager
+
+            // NetworkManager
+
+            Logger.Log("[Sequencer] Finished Start sequence");
+        }
+
 
         public static void SubscribeUpdate(int order, TickCallback callback)
         {
@@ -130,7 +220,7 @@ namespace SmartPoint.AssetAssistant
         {
             if (Instance == null)
             {
-                Debug.LogError("Error: Sequencer is null");
+                Logger.Log("Error: Sequencer is null");
                 return null;
             }
             var rout = Instance.StartCoroutine(RunCoroutine(routine));
@@ -217,7 +307,7 @@ namespace SmartPoint.AssetAssistant
                 ScreenHeight = newHeight;
                 AspectRatio = (float)newWidth / newHeight;
 
-                Debug.Log($"Screen size changed: {ScreenWidth}x{ScreenHeight}");
+                Logger.Log($"Screen size changed: {ScreenWidth}x{ScreenHeight}");
 
                 // Assuming GameObjects implement IViewportChangeHandler
                 var gameObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
@@ -353,8 +443,6 @@ namespace SmartPoint.AssetAssistant
 
         private string FormatMessage(string message) => (string)null;
 
-        private IEnumerator LogSender(string url) => (IEnumerator)null;
-
         public static bool IntersectGUI(Vector3 position) => new bool();
 
         public static List<RaycastResult> GetIntersectGUIs(Vector3 position) => (List<RaycastResult>)null;
@@ -373,13 +461,6 @@ namespace SmartPoint.AssetAssistant
             stringBuilder = new StringBuilder();
             elapsedTime = 0f;
             waitForEndOfFrame = null;
-        }
-
-        public enum WebhookTarget
-        {
-            None,
-            Discord,
-            Slack,
         }
 
         public delegate void EventCallback();

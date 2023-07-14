@@ -24,7 +24,7 @@ namespace SmartPoint.AssetAssistant.Forms
         {
             if (_manifest == null)
             {
-                Debug.Log("Manifest not set yet.");
+                Logger.Log("Manifest not set yet.");
                 return false;
             }
 

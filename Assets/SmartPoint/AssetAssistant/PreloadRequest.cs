@@ -5,19 +5,42 @@ using UnityEngine;
 
 namespace SmartPoint.AssetAssistant
 {
-    /*
     [Serializable]
-    public struct PreloadRequest
+    public sealed class PreloadRequest : ScriptableObject
     {
-        public PreloadRequest(string assetBundleName, bool loadAllAssets)
+        private static PreloadRequest instance;
+
+        public static PreloadRequest[] GetPreloadRequests()
         {
+            var x = GetInstance();
+            PreloadRequest[] preloadRequests;
+
+            if (x != null)
+            {
+                preloadRequests = ((PreloadRequest)instance).PreloadRequests;
+            }
+            else
+            {
+                preloadRequests = null; // Default value in case instance is null
+            }
+
+            return preloadRequests;
         }
 
-        [SerializeField]
-        public string assetBundleName;
+        private static object GetInstance()
+        {
+            if (instance == null)
+            {
+                instance = new PreloadRequest(); // Instance creation logic should go here
+            }
 
-        [SerializeField]
+            return instance;
+        }
+
+        public string[] assetBundleName;
+
         public bool loadAllAssets;
+
+        public PreloadRequest[] PreloadRequests { get; private set; }
     }
-    */
 }

@@ -32,7 +32,7 @@ namespace SmartPoint.AssetAssistant
 
             if (assetPaths.Length == 0)
             {
-                Debug.LogError($"AssetBundleRecord: assetPaths is empty for {_projectName}/{_assetBundleName}");
+                Logger.Log($"AssetBundleRecord: assetPaths is empty for {_projectName}/{_assetBundleName}");
             }
 
             if (assetPaths.Length > 0)

@@ -112,7 +112,7 @@ namespace SmartPoint.AssetAssistant
                 _unloadAllLoadedObjects = false;
                 return referencedCount;
             }
-            Debug.Log("Unload asset-bundle:" + _record.assetBundleName);
+            Logger.Log("Unload asset-bundle:" + _record.assetBundleName);
             _record = null;
             if (assetBundle != null)
             {

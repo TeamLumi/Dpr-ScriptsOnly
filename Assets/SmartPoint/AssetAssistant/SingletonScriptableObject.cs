@@ -19,7 +19,7 @@ namespace SmartPoint.AssetAssistant
 
                     if (instance == null)
                     {
-                        Debug.LogError("An instance of " + typeof(T) +
+                        Logger.Log("An instance of " + typeof(T) +
                         " is needed in the scene, but there is none.");
                     }
                 }

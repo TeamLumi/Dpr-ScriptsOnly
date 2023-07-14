@@ -25,7 +25,7 @@ namespace SmartPoint.AssetAssistant
             {
                 if (isApplicationQuitting)
                 {
-                    Debug.LogWarning("Instance '" + typeof(T) +
+                    Logger.Log("Instance '" + typeof(T) +
                         "' already destroyed on application quit." +
                         " Won't create again - returning null.");
                     return null;
@@ -37,7 +37,7 @@ namespace SmartPoint.AssetAssistant
 
                     if (FindObjectsOfType(typeof(T)).Length > 1)
                     {
-                        Debug.LogError("More than one instance of Singleton: " + typeof(T));
+                        Logger.Log("More than one instance of Singleton: " + typeof(T));
                         return instance;
                     }
 
@@ -55,23 +55,17 @@ namespace SmartPoint.AssetAssistant
             }
         }
 
-        //protected virtual void Awake()
-        //{
-        //if (instance == null)
-        //{
-        //instance = this as T;
-        //DontDestroyOnLoad(this.gameObject);
-        //}
-        //else if (instance != this)
-        //{
-        //Destroy(gameObject);
-        //}
-        //}
-
-        protected virtual bool Awake()
+        protected virtual void Awake()
         {
-            //
-            return true;
+            if (instance == null)
+            {
+                instance = this as T;
+                DontDestroyOnLoad(this.gameObject);
+            }
+            else if (instance != this)
+            {
+            Destroy(gameObject);
+            }
         }
 
         protected virtual void OnApplicationQuit()
